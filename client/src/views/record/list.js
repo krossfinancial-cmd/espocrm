@@ -101,6 +101,7 @@ class ListRecordView extends View {
      * @property {boolean} [forceSettings] Force settings. As of v9.2.0.
      * @property {boolean} [forceAllResultSelectable] Force select all result. As of v9.2.0.
      * @property {module:search-manager~whereItem} [allResultWhereItem] Where item for select all result. As of v9.2.0.
+     * @property {boolean} [storeSettings=true] To store settings. As of v9.4.0.
      */
 
     /**
@@ -658,7 +659,7 @@ class ListRecordView extends View {
         },
         /** @this ListRecordView */
         'click [data-action="showMore"]': async function () {
-            await this.showMoreRecords();
+            this.showMoreRecords();
 
             this.focusOnList();
         },
@@ -2329,7 +2330,7 @@ class ListRecordView extends View {
 
     /** @private */
     setupMassActions() {
-        if (this.massActionsDisabled) {
+        if (this.massActionsDisabled || !this.checkboxes) {
             this.massActionList = [];
             this.checkAllResultMassActionList = [];
             this.massActionDefs = {};
@@ -2377,12 +2378,12 @@ class ListRecordView extends View {
         const metadataMassActionList = [
             ...this.getMetadata().get(['clientDefs', 'Global', 'massActionList']) || [],
             ...this.getMetadata().get(['clientDefs', this.scope, 'massActionList']) || [],
-        ];
+        ].filter((it, i, self) => self.indexOf(it) === i);
 
         const metadataCheckAllMassActionList = [
             ...this.getMetadata().get(['clientDefs', 'Global', 'checkAllResultMassActionList']) || [],
             ...this.getMetadata().get(['clientDefs', this.scope, 'checkAllResultMassActionList']) || [],
-        ];
+        ].filter((it, i, self) => self.indexOf(it) === i);
 
         metadataMassActionList.forEach(item => {
             const defs = /** @type {Espo.Utils~ActionAccessDefs & Espo.Utils~ActionAvailabilityDefs} */
@@ -2390,7 +2391,7 @@ class ListRecordView extends View {
 
             if (
                 !Espo.Utils.checkActionAvailability(this.getHelper(), defs) ||
-                !Espo.Utils.checkActionAccess(this.getAcl(), this.entityType, defs)
+                this.entityType && !Espo.Utils.checkActionAccess(this.getAcl(), this.entityType, defs)
             ) {
                 return;
             }
@@ -3754,11 +3755,13 @@ class ListRecordView extends View {
             return;
         }
 
-        this._listSettingsHelper = this.options.settingsHelper || new ListSettingsHelper(
+        this._listSettingsHelper = this.options.settingsHelper ?? new ListSettingsHelper(
             this.entityType,
             this.layoutName,
             this.getUser().id,
-            this.getStorage()
+            {
+                useStorage: this.options.storeSettings ?? true,
+            }
         );
 
         const view = new RecordListSettingsView({

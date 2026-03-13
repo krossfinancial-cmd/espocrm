@@ -42,7 +42,8 @@ use Espo\Core\FieldSanitize\SanitizeManager;
 use Espo\Core\ORM\Defs\AttributeParam;
 use Espo\Core\ORM\Entity as CoreEntity;
 use Espo\Core\ORM\Repository\Option\RemoveOption;
-use Espo\Core\ORM\Repository\Option\SaveContext;
+use Espo\Core\Record\Deleted\RestorerFactory;
+use Espo\ORM\Repository\Option\SaveContext;
 use Espo\Core\ORM\Repository\Option\SaveOption;
 use Espo\Core\ORM\Type\FieldType;
 use Espo\Core\Record\Access\LinkCheck;
@@ -51,8 +52,6 @@ use Espo\Core\Record\ActionHistory\ActionLogger;
 use Espo\Core\Record\ConcurrencyControl\OptimisticProcessor;
 use Espo\Core\Record\Defaults\Populator as DefaultsPopulator;
 use Espo\Core\Record\Defaults\PopulatorFactory as DefaultsPopulatorFactory;
-use Espo\Core\Record\Deleted\DefaultRestorer;
-use Espo\Core\Record\Deleted\Restorer;
 use Espo\Core\Record\DynamicLogic\InputFilterProcessor;
 use Espo\Core\Record\Formula\Processor as FormulaProcessor;
 use Espo\Core\Record\Input\Data;
@@ -580,7 +579,7 @@ class Service implements Crud,
             ->getFieldList();
 
         foreach ($fieldDefsList as $fieldDefs) {
-            if (!$fieldDefs->getParam('readOnlyAfterCreate')) {
+            if (!$fieldDefs->getParam(FieldParam::READ_ONLY_AFTER_CREATE)) {
                 continue;
             }
 
@@ -976,12 +975,16 @@ class Service implements Crud,
             throw new NotFound();
         }
 
-        /** @var class-string<Restorer<Entity>> $restorerClassName */
-        $restorerClassName = $this->metadata->get("recordDefs.$this->entityType.deletedRestorerClassName") ??
-            DefaultRestorer::class;
+        if (!$entity->hasAttribute(Attribute::DELETED)) {
+            throw new Forbidden("Record type is not restorable.");
+        }
 
-        /** @var Restorer<Entity> $restorer */
-        $restorer = $this->injectableFactory->createWithBinding($restorerClassName, $this->createBinding());
+        if ($entity->get(Attribute::DELETED) !== true) {
+            throw new Conflict("Record type is not soft-deleted.");
+        }
+
+        $factory = $this->injectableFactory->createWithBinding(RestorerFactory::class, $this->createBinding());
+        $restorer = $factory->create($this->entityType);
 
         $restorer->restore($entity);
     }

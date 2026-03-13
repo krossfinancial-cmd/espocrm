@@ -27,11 +27,11 @@
  * these Appropriate Legal Notices must retain the display of the "EspoCRM" word.
  ************************************************************************/
 
-namespace Espo\Core\ORM\Repository\Option;
+namespace Espo\ORM\Repository\Option;
 
 use Closure;
 use Espo\Core\Utils\Util;
-use Espo\ORM\Repository\Option\SaveOptions;
+use LogicException;
 
 /**
  * A save context.
@@ -39,7 +39,9 @@ use Espo\ORM\Repository\Option\SaveOptions;
  * If a save invokes another save, the context instance should not be re-used.
  * If a save invokes a relate action, the context can be passed to that action.
  *
- * @since 9.1.0
+ * @since 9.4.0
+ *
+ * Before 9.4.0, since 9.1.0 it was located in the `Core` namespace.
  */
 class SaveContext
 {
@@ -47,6 +49,7 @@ class SaveContext
 
     private string $actionId;
     private bool $linkUpdated = false;
+    private ?bool $isNew = null;
 
     /** @var Closure[] */
     private array $deferredActions = [];
@@ -158,5 +161,29 @@ class SaveContext
     public function createDerived(): self
     {
         return new self($this->actionId);
+    }
+
+    /**
+     * @internal
+     * @since 9.4.0
+     */
+    public function setIsNew(bool $isNew): void
+    {
+        if ($this->isNew !== null) {
+            throw new LogicException("Cannot set already set isNew.");
+        }
+
+        $this->isNew = $isNew;
+    }
+
+    /**
+     * Was the entity new before save. Can be accessed only after save is started.
+     * To be used for late hooks, when then entity is already not new, to check.
+     *
+     * @since 9.4.0
+     */
+    public function isNew(): bool
+    {
+        return $this->isNew ?? throw new LogicException("Cannot access isNew before it's set.");
     }
 }

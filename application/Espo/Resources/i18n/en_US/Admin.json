@@ -205,6 +205,7 @@
         "dynamicLogicOptions": "Conditional options",
         "dynamicLogicInvalid": "Conditions making field invalid",
         "dynamicLogicReadOnlySaved": "Saved state conditions making field read-only",
+        "dynamicLogicCascading": "Cascading select",
         "probabilityMap": "Stage Probabilities (%)",
         "notActualOptions": "Not Actual Options",
         "activeOptions": "Active Options",
@@ -242,7 +243,11 @@
         "aclScope": "ACL Scope",
         "onlyAdmin": "Only for Admin",
         "notStorable": "Not Storable",
-        "itemsEditable": "Items Editable"
+        "itemsEditable": "Items Editable",
+        "openInNewTab": "Open in new tab",
+        "notLockable": "Not Lockable",
+        "protocolRequired": "Protocol Required",
+        "cascadeRemoval": "Cascade Removal"
     },
     "strings" : {
         "rebuildRequired": "Rebuild is required"
