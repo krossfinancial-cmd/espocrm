@@ -1,0 +1,82 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "functions": {
+    "api/**/*.php": {
+      "runtime": "vercel-php@0.7.4"
+    }
+  },
+  "routes": [
+    {
+      "src": "^/robots\\.txt$",
+      "dest": "/public/robots.txt"
+    },
+    {
+      "src": "^/install/css/(.*)$",
+      "dest": "/public/install/css/$1"
+    },
+    {
+      "src": "^/install/js/(.*)$",
+      "dest": "/public/install/js/$1"
+    },
+    {
+      "src": "^/install/img/(.*)$",
+      "dest": "/public/install/img/$1"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "^/oauth/callback$",
+      "dest": "/api/oauth/callback/index.php"
+    },
+    {
+      "src": "^/oauth-callback$",
+      "dest": "/api/oauth-callback.php"
+    },
+    {
+      "src": "^/portal/oauth-callback$",
+      "dest": "/api/portal/oauth-callback.php"
+    },
+    {
+      "src": "^/api/v1/portal-access$",
+      "dest": "/api/v1/portal-access/index.php"
+    },
+    {
+      "src": "^/api/v1/portal-access/(.*)$",
+      "dest": "/api/v1/portal-access/index.php"
+    },
+    {
+      "src": "^/api/v1$",
+      "dest": "/api/v1/index.php"
+    },
+    {
+      "src": "^/api/v1/(.*)$",
+      "dest": "/api/v1/index.php"
+    },
+    {
+      "src": "^/portal$",
+      "dest": "/api/portal/index.php"
+    },
+    {
+      "src": "^/portal/(.*)$",
+      "dest": "/api/portal/index.php"
+    },
+    {
+      "src": "^/install$",
+      "dest": "/api/install/index.php"
+    },
+    {
+      "src": "^/install/(.*)$",
+      "dest": "/api/install/index.php"
+    },
+    {
+      "src": "^/$",
+      "dest": "/api/index.php"
+    },
+    {
+      "src": "^/(.*)$",
+      "dest": "/api/index.php"
+    }
+  ]
+}
